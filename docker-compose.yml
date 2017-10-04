@@ -1,0 +1,24 @@
+version: '2'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: meseeks_mongodb
+    tty: true
+    ports:
+      - 27018:27018
+    command: mongod --smallfiles # --quiet
+
+  golang:
+    build: 
+      context: .
+      dockerfile: ./Docker/dev/golang/dockerfile
+    container_name: meseeks_golang
+    ports:
+     - 8080:8080
+    volumes:
+     - ./:/go/src/Meseeeks
+    working_dir: /go/src/Meseeeks
+    depends_on:
+      - mongodb
+    command: fresh
