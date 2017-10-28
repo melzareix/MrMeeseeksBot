@@ -21,4 +21,4 @@ services:
     working_dir: /go/src/github.com/melzareix/MrMeseeksBot
     depends_on:
       - mongodb
-    command: "gin run main.go"
+    command: "fresh"

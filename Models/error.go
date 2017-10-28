@@ -14,7 +14,7 @@ type Error struct {
 }
 
 // Write JSON Error Message
-func (err *Error) ErrorWithJSON(w http.ResponseWriter) {
+func (err *Error) ErrorAsJSON(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusMethodNotAllowed)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(&err)

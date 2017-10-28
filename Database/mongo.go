@@ -33,15 +33,14 @@ func (db *Mongo) Connect(){
 }
 
 // Create A New User
-func (db *Mongo) CreateUser(u *Models.User) {
+func (db *Mongo) CreateUser(u *Models.User) (error){
 	session := db.session.Copy()
 	defer session.Close()
 
 	c := session.DB(DB_NAME).C(USERS_COLLECTION)
 	err := c.Insert(&u)
-	if err != nil {
-		log.Fatal(err)
-	}
+
+	return err
 }
 
 
