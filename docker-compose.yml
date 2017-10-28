@@ -15,10 +15,10 @@ services:
       dockerfile: ./Docker/dev/golang/dockerfile
     container_name: meseeks_golang
     ports:
-     - 8080:8080
+     - 3000:3000
     volumes:
-     - ./:/go/src/Meseeeks
-    working_dir: /go/src/Meseeeks
+     - ./:/go/src/github.com/melzareix/MrMeseeksBot
+    working_dir: /go/src/github.com/melzareix/MrMeseeksBot
     depends_on:
       - mongodb
     command: "fresh"
