@@ -6,7 +6,7 @@ services:
     container_name: meseeks_mongodb
     tty: true
     ports:
-      - 27018:27018
+      - 27017:27017
     command: mongod --smallfiles # --quiet
 
   golang:
@@ -21,4 +21,4 @@ services:
     working_dir: /go/src/github.com/melzareix/MrMeseeksBot
     depends_on:
       - mongodb
-    command: "fresh"
+    command: "gin run main.go"
