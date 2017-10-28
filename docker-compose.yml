@@ -21,4 +21,4 @@ services:
     working_dir: /go/src/Meseeeks
     depends_on:
       - mongodb
-    command: fresh
+    command: "fresh"

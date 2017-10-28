@@ -1,9 +1,11 @@
 package main
 
 import (
-	"fmt"
+	"github.com/joho/godotenv"
+	"github.com/melzareix/MrMeseeksBot/Server"
 )
 
 func main() {
-	fmt.Println("I'm working")
+	godotenv.Load()
+	Server.StartServer()
 }
