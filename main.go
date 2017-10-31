@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/joho/godotenv"
-	"github.com/melzareix/MrMeeseeksBot/Api/Welcome"
 	"github.com/melzareix/MrMeeseeksBot/Database"
+	"github.com/melzareix/MrMeeseeksBot/Api/Welcome"
 	"net/http"
 	"os"
 )

@@ -5,6 +5,7 @@ import (
 	"gopkg.in/mgo.v2"
 	"log"
 	"github.com/melzareix/MrMeeseeksBot/Models"
+	"gopkg.in/mgo.v2/bson"
 )
 
 var (
@@ -29,7 +30,6 @@ func (db *Mongo) Connect(){
 		log.Fatal(err)
 	}
 	db.session = session
-
 }
 
 // Create A New User
@@ -43,6 +43,34 @@ func (db *Mongo) CreateUser(u *Models.User) (error){
 	return err
 }
 
+func (db *Mongo) GetUser(id string) (*Models.User, error) {
+	session := db.session.Copy()
+	defer session.Close()
+
+	c := session.DB(DB_NAME).C(USERS_COLLECTION)
+
+	user := &Models.User{}
+	err := c.Find(bson.M{"uuid": id}).One(user)
+
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+func (db *Mongo) SaveUser(u *Models.User) error {
+	session := db.session.Copy()
+	defer session.Close()
+
+	c := session.DB(DB_NAME).C(USERS_COLLECTION)
+
+	err := c.Update(bson.M{"uuid": u.Uuid}, u)
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 // Bind the connection to global DB variable
 func Init() {
