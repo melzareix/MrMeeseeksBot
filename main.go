@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"github.com/melzareix/MrMeeseeksBot/Api"
+	"github.com/melzareix/MrMeeseeksBot/Models"
 )
 
 func StartServer() {
@@ -15,6 +16,7 @@ func StartServer() {
 	mux.HandleFunc("/calendar/callback", Api.CalendarAuthorizationCallbackHandler)
 	mux.HandleFunc("/auth/calendar", Api.CalendarAuthorizationHandler)
 	mux.HandleFunc("/chat", nil)
+	mux.HandleFunc("/", ErrorHandler)
 	port := os.Getenv("PORT")
 
 	if port == "" {
@@ -22,6 +24,14 @@ func StartServer() {
 	}
 	fmt.Println("Server started at http://localhost:" + port)
 	http.ListenAndServe(":"+port, mux)
+}
+
+func ErrorHandler(w http.ResponseWriter, r *http.Request) {
+	err := Models.Error{
+		Status:  false,
+		Code:    http.StatusNotFound,
+		Message: "404 Not Found."}
+	err.ErrorAsJSON(w)
 }
 
 func main() {
