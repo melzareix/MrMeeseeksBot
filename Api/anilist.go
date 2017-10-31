@@ -1,67 +1,169 @@
 package Api
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/url"
+	"time"
 	"log"
-	"encoding/json"
+	"strconv"
 )
 
 const (
-	ANILIST_BASE_URL = "https://anilist.co/api/"
-	ANILIST_AUTH_URL = ANILIST_BASE_URL + "auth/access_token"
+	ANILIST_BASE_URL   = "https://anilist.co/api/"
+	ANILIST_AUTH_URL   = ANILIST_BASE_URL + "auth/access_token"
+	ANILIST_SEARCH_URL = ANILIST_BASE_URL + "anime/search/"
+	ANILIST_AIRING_URL = ANILIST_BASE_URL + "anime/"
 )
 
 type Anime struct {
-
+	Id            int      `json:"id"`
+	Genres        []string `json:"genres"`
+	ImageUrlMed   string   `json:"image_url_med"`
+	AiringStatus  string   `json:"airing_status"`
+	TotalEpisodes int      `json:"total_episodes"`
+	Duration      int      `json:"duration"`
 }
 
-type AniListClient struct{
-	client_id string
+type AniListClient struct {
+	client_id     string
 	client_secret string
-	access_token string
-	expiry_date int
+	access_token  string
+	expiry_date   int64
 }
 
-func (c *AniListClient) RefreshToken() {
+// Refresh grant token
+func (c *AniListClient) RefreshToken() error {
+
+	// Check that current token didn't expire
+	if c.expiry_date > 0 {
+		expiry_date := time.Unix(c.expiry_date, 0)
+		t := time.Now()
+		d := expiry_date.Sub(t)
+		if d > 0 {
+			return nil
+		}
+	}
 
 	// Format Query Params
-	auth_url, _ := url.Parse(ANILIST_AUTH_URL)
-	q := auth_url.Query()
-	q.Add("grant_type", "client_credentials")
-	q.Add("client_id", c.client_id)
-	q.Add("client_secret", c.client_secret)
-	auth_url.RawQuery = q.Encode()
+	q := map[string]string{
+		"grant_type":    "client_credentials",
+		"client_id":     c.client_id,
+		"client_secret": c.client_secret,
+	}
+	auth_url := FormatUrl(ANILIST_AUTH_URL, q)
 
 	// Request Authentication Token
-	req, err := http.Post(auth_url.String(), "application/json", nil)
+	req, err := http.Post(auth_url, "application/json", nil)
 	defer req.Body.Close()
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	// Parse JSON response
-	type AniListAuthResponse struct{
-		token_type string
-		access_token string
-		expires_in int
-		expires int
+	type AniListAuthResponse struct {
+		Token_type   string `json:"token_type"`
+		Access_token string `json:"access_token"`
+		Expires_in   int    `json:"expires_in"`
+		Expires      int64  `json:"expires"`
 	}
 
 	resp := &AniListAuthResponse{}
 	err = json.NewDecoder(req.Body).Decode(&resp)
 	if err != nil {
-		log.Fatal(err)
+		return err
+	}
+	c.expiry_date = resp.Expires
+	c.access_token = resp.Access_token
+
+	return nil
+}
+
+// Search for a certain Anime
+func (c *AniListClient) Search(name string) ([]Anime, error) {
+
+	search_url :=  ANILIST_SEARCH_URL + url.PathEscape(name)
+	search_url, err := setAccessToken(c, search_url)
+	if err != nil {
+		return nil, err
 	}
 
-	c.expiry_date = resp.expires
-	c.access_token = resp.access_token
+	resp, err := http.Get(search_url)
+	if err != nil {
+		return nil, err
+	}
+
+	var results []Anime
+	log.Println(search_url)
+
+	err = json.NewDecoder(resp.Body).Decode(&results)
+	if err != nil {
+		return nil, err
+	}
+	return results, nil
+}
+
+// Get Episodes Airing Dates
+func (c *AniListClient) GetAiringDates(id int) (map[string]int64, error) {
+	airing_url := ANILIST_AIRING_URL + url.PathEscape(strconv.Itoa(id)) + "/airing"
+	airing_url, err := setAccessToken(c, airing_url)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := http.Get(airing_url)
+	if err != nil {
+		return nil, err
+	}
+
+	var results map[string]int64
+
+	err = json.NewDecoder(resp.Body).Decode(&results)
+	if err != nil {
+		return nil, err
+	}
+	return results, nil
+
 }
 
 // Create New AniListAPI Client from Credentials
-func NewAniListClient(client_id string, client_secret string) (*AniListClient) {
+func NewAniListClient(client_id string, client_secret string) (*AniListClient, error) {
 	client := &AniListClient{client_id: client_id, client_secret: client_secret}
-	client.RefreshToken()
-	return client
+	err := client.RefreshToken()
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
+}
+
+// Format URL params
+func FormatUrl(base_url string, q_params map[string]string) string {
+	u, _ := url.Parse(base_url)
+	q := u.Query()
+
+	for k, v := range q_params {
+		q.Add(k, v)
+	}
+	u.RawQuery = q.Encode()
+	return u.String()
+}
+
+// Set Access Token
+func setAccessToken(c *AniListClient, u string) (string, error) {
+	err := c.RefreshToken()
+	if err != nil {
+		return "", err
+	}
+
+	new_url, err := url.Parse(u)
+	if err != nil {
+		return "", nil
+	}
+
+	q := new_url.Query()
+	q.Add("access_token", c.access_token)
+
+	new_url.RawQuery = q.Encode()
+	return new_url.String(), nil
 }
