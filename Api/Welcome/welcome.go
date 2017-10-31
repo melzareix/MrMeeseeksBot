@@ -2,8 +2,8 @@ package Welcome
 
 import (
 	"net/http"
-	"github.com/melzareix/MrMeseeksBot/Models"
-	"github.com/melzareix/MrMeseeksBot/Database"
+	"github.com/melzareix/MrMeeseeksBot/Models"
+	"github.com/melzareix/MrMeeseeksBot/Database"
 	"github.com/satori/go.uuid"
 	"encoding/json"
 )

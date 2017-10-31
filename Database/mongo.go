@@ -4,7 +4,7 @@ import (
 	"os"
 	"gopkg.in/mgo.v2"
 	"log"
-	"github.com/melzareix/MrMeseeksBot/Models"
+	"github.com/melzareix/MrMeeseeksBot/Models"
 )
 
 var (
