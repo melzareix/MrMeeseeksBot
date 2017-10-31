@@ -1,15 +1,14 @@
-package Welcome
+package Api
 
 import (
 	"net/http"
 	"github.com/melzareix/MrMeeseeksBot/Models"
 	"github.com/melzareix/MrMeeseeksBot/Database"
-	"github.com/satori/go.uuid"
 	"encoding/json"
 )
 
 // Handle the Welcome Route
-func Handler(w http.ResponseWriter, r *http.Request) {
+func WelcomeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		err := Models.Error{
 			Status: false,
@@ -19,9 +18,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	uniqueId := uuid.NewV4().String()
-	user := Models.User{Uuid: uniqueId, AccessToken: "", TokenType: "", RefreshToken: "", Expiry: ""}
-	err := Database.DB.CreateUser(&user)
+	user := Models.NewUser()
+	err := Database.DB.CreateUser(user)
 
 	if err != nil {
 		err := Models.Error{
@@ -32,7 +30,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u := Models.Welcome{Message: "Welcome!", Uuid: uniqueId}
+	u := Models.Welcome{Message: "Welcome!", Uuid: user.Uuid}
 	RespondWithJSON(w, &u)
 }
 

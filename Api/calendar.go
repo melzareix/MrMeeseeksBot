@@ -1,16 +1,16 @@
 package Api
 
 import (
-	"io/ioutil"
-	"log"
-	"google.golang.org/api/calendar/v3"
+	"context"
+	"encoding/json"
 	"fmt"
-	"golang.org/x/oauth2/google"
+	"github.com/melzareix/MrMeeseeksBot/Database"
 	"github.com/melzareix/MrMeeseeksBot/Models"
 	"golang.org/x/oauth2"
-	"context"
+	"golang.org/x/oauth2/google"
+	"google.golang.org/api/calendar/v3"
+	"io/ioutil"
 	"net/http"
-	"github.com/melzareix/MrMeeseeksBot/Database"
 )
 
 type CalendarUser struct {
@@ -22,53 +22,132 @@ var (
 )
 
 // Google Calendar Events
-func (u* CalendarUser) generateTokenUrl(config *oauth2.Config) string {
-	return config.AuthCodeURL("state-token", oauth2.AccessTypeOffline);
+func (u *CalendarUser) generateTokenUrl(config *oauth2.Config) string {
+	return config.AuthCodeURL(u.Uuid, oauth2.AccessTypeOffline)
 }
 
-func (u* CalendarUser) getToken(config *oauth2.Config, code string) {
+// Authorize OAUTH2 Google calendar
+func (u *CalendarUser) getToken(config *oauth2.Config, code string) error {
 	tok, err := config.Exchange(context.TODO(), code)
 	if err != nil {
-		log.Fatalf("Unable to retrieve token from web %v", err)
+		return err
 	}
 	u.Token = tok
-	Database.DB.SaveUser(u.User)
+	err = Database.DB.SaveUser(u.User)
+	return err
 }
 
-func (u *CalendarUser) getClient(ctx context.Context, config *oauth2.Config) *http.Client{
-	fmt.Println(u.generateTokenUrl(config))
-	var code string;
-	if _, err := fmt.Scan(&code); err != nil {
-		log.Fatalf("Unable to read authorization code %v", err)
-	}
-	u.getToken(config, code)
-	return config.Client(ctx, u.Token)
-}
-
-func (u *CalendarUser) Authorize() {
-	ctx := context.Background()
+func (u *CalendarUser) GetConfig() (*oauth2.Config, error) {
 	b, err := ioutil.ReadFile("client_secret.json")
 	if err != nil {
-		log.Fatalf("Aborting! Cannot read secret file! %v", err)
+		return nil, err
 	}
 
 	config, err := google.ConfigFromJSON(b, calendar.CalendarScope)
 	if err != nil {
-		log.Fatalf("Unable to retrieve calendar Client %v", err)
+		return nil, err
 	}
-
-	client := u.getClient(ctx, config)
-	srv, err = calendar.New(client)
-	if err != nil {
-		log.Fatal(err)
-	}
+	return config, nil
 }
 
-func (u *CalendarUser) AddEvent(event *calendar.Event) {
+func (u *CalendarUser) GetCalendarService(code string) (*calendar.Service, error) {
+	ctx := context.Background()
+	config, err := u.GetConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	client := config.Client(ctx, u.Token)
+	srv, err := calendar.New(client)
+	if err != nil {
+		return nil, err
+	}
+	return srv, nil
+}
+
+// Add Event to google calendar
+func (u *CalendarUser) AddEvent(event *calendar.Event) error {
 	calendarId := "primary"
 	event, err := srv.Events.Insert(calendarId, event).Do()
 	if err != nil {
-		log.Fatalf("Unable to create event. %v\n", err)
+		return err
 	}
 	fmt.Printf("Event created: %s\n", event.HtmlLink)
+	return nil
+}
+
+// Handle the Calendar Authorization
+func CalendarAuthorizationHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		err := Models.Error{
+			Status:  false,
+			Code:    http.StatusMethodNotAllowed,
+			Message: r.Method + " Method Not Allowed. Only GET requests are allowed."}
+		err.ErrorAsJSON(w)
+		return
+	}
+
+	userUuid := r.Header.Get("Authorization")
+	user, err := Database.DB.GetUser(userUuid)
+	if err != nil {
+		err := Models.Error{
+			Status:  false,
+			Code:    http.StatusBadRequest,
+			Message: "User " + userUuid + " not found."}
+		err.ErrorAsJSON(w)
+		return
+	}
+
+	calendarUser := CalendarUser{User: user}
+	config, err := calendarUser.GetConfig()
+	if err != nil {
+		err := Models.Error{
+			Status:  false,
+			Code:    http.StatusBadRequest,
+			Message: err.Error()}
+		err.ErrorAsJSON(w)
+		return
+	}
+	http.Redirect(w, r, calendarUser.generateTokenUrl(config), http.StatusTemporaryRedirect)
+}
+
+// Callback For Authorization
+func CalendarAuthorizationCallbackHandler(w http.ResponseWriter, r *http.Request) {
+	userUuid := r.FormValue("state")
+	code := r.FormValue("code")
+
+	user, err := Database.DB.GetUser(userUuid)
+	if err != nil {
+		err := Models.Error{
+			Status:  false,
+			Code:    http.StatusBadRequest,
+			Message: "User " + userUuid + " not found."}
+		err.ErrorAsJSON(w)
+		return
+	}
+
+	u := CalendarUser{User: user}
+	config, err := u.GetConfig()
+	if err != nil {
+		err := Models.Error{
+			Status:  false,
+			Code:    http.StatusBadRequest,
+			Message: err.Error()}
+		err.ErrorAsJSON(w)
+		return
+	}
+
+	err = u.getToken(config, code)
+	if err != nil {
+		err := Models.Error{
+			Status:  false,
+			Code:    http.StatusBadRequest,
+			Message: err.Error()}
+		err.ErrorAsJSON(w)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(&u)
 }

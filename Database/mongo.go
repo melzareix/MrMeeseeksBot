@@ -3,7 +3,6 @@ package Database
 import (
 	"os"
 	"gopkg.in/mgo.v2"
-	"log"
 	"github.com/melzareix/MrMeeseeksBot/Models"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -22,14 +21,15 @@ type Mongo struct {
 }
 
 // Connect to MongoDB Server
-func (db *Mongo) Connect(){
+func (db *Mongo) Connect() error{
 	MONGO_URL := os.Getenv("MONGO_URL")
 	session, err := mgo.Dial(MONGO_URL)
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	db.session = session
+	return nil
 }
 
 // Create A New User

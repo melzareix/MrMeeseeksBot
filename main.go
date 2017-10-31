@@ -4,16 +4,17 @@ import (
 	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/melzareix/MrMeeseeksBot/Database"
-	"github.com/melzareix/MrMeeseeksBot/Api/Welcome"
 	"net/http"
 	"os"
+	"github.com/melzareix/MrMeeseeksBot/Api"
 )
 
 func StartServer() {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/welcome", Welcome.Handler)
+	mux.HandleFunc("/welcome", Api.WelcomeHandler)
+	mux.HandleFunc("/calendar/callback", Api.CalendarAuthorizationCallbackHandler)
+	mux.HandleFunc("/auth/calendar", Api.CalendarAuthorizationHandler)
 	mux.HandleFunc("/chat", nil)
-	mux.HandleFunc("/", nil)
 	port := os.Getenv("PORT")
 
 	if port == "" {
