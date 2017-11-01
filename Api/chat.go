@@ -1,38 +1,57 @@
 package Api
 
 import (
-	"fmt"
+	"encoding/json"
 	"github.com/melzareix/MrMeeseeksBot/Database"
 	"github.com/melzareix/MrMeeseeksBot/Models"
 	"google.golang.org/api/calendar/v3"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+	"github.com/dustin/go-humanize"
 )
 
 func ChatHandler(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == http.MethodOptions {
+		err := Models.Error{
+			Status:  true,
+			Code:    http.StatusOK,
+			Message: "Preflight Request!"}
+		err.ErrorAsPlainText(w)
+		return
+	}
+
 	if r.Method != http.MethodPost {
 		err := Models.Error{
 			Status:  false,
 			Code:    http.StatusMethodNotAllowed,
 			Message: r.Method + " Method Not Allowed. Only POST requests are allowed."}
-		err.ErrorAsJSON(w)
+		err.ErrorAsPlainText(w)
 		return
 	}
 
-	userUuid := r.Header.Get("Authorization")
+	userUuid := r.Header.Get("authorization")
 	user, err := Database.DB.GetUser(userUuid)
 	if err != nil {
 		err := Models.Error{
 			Status:  false,
 			Code:    http.StatusBadRequest,
 			Message: "Invalid user UUID."}
-		err.ErrorAsJSON(w)
+		err.ErrorAsPlainText(w)
 		return
 	}
 
-	message := r.FormValue("message")
+	var resp map[string]string
+
+	err = json.NewDecoder(r.Body).Decode(&resp)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	message := resp["message"]
 	HandleMessage(message, user, w)
 }
 
@@ -43,6 +62,12 @@ func HandleMessage(message string, user *Models.User, w http.ResponseWriter) {
 	switch command {
 	case "schedule":
 		HandleScheduling(strings.Join(msg[1:], " "), user, w)
+	default:
+		err := Models.Error{
+			Status:  false,
+			Code:    http.StatusBadRequest,
+			Message: "Invalid Command"}
+		err.ErrorAsPlainText(w)
 	}
 }
 
@@ -53,7 +78,7 @@ func HandleScheduling(name string, user *Models.User, w http.ResponseWriter) {
 			Status:  false,
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to connect to API."}
-		err.ErrorAsJSON(w)
+		err.ErrorAsPlainText(w)
 		return
 	}
 
@@ -63,7 +88,7 @@ func HandleScheduling(name string, user *Models.User, w http.ResponseWriter) {
 			Status:  false,
 			Code:    http.StatusBadRequest,
 			Message: "No Results for " + name + "."}
-		err.ErrorAsJSON(w)
+		err.ErrorAsPlainText(w)
 		return
 	}
 
@@ -74,7 +99,7 @@ func HandleScheduling(name string, user *Models.User, w http.ResponseWriter) {
 			Status:  false,
 			Code:    http.StatusBadRequest,
 			Message: "The anime " + name + " has " + currentAnime.AiringStatus + "."}
-		err.ErrorAsJSON(w)
+		err.ErrorAsPlainText(w)
 		return
 	}
 
@@ -86,7 +111,7 @@ func HandleScheduling(name string, user *Models.User, w http.ResponseWriter) {
 			Status:  false,
 			Code:    http.StatusBadRequest,
 			Message: "Airing Dates not available for " + name + "."}
-		err.ErrorAsJSON(w)
+		err.ErrorAsPlainText(w)
 		return
 	}
 
@@ -114,7 +139,7 @@ func HandleScheduling(name string, user *Models.User, w http.ResponseWriter) {
 			Status:  false,
 			Code:    http.StatusBadRequest,
 			Message: "All episodes for " + name + "have finished airing."}
-		err.ErrorAsJSON(w)
+		err.ErrorAsPlainText(w)
 		return
 	}
 
@@ -130,24 +155,24 @@ func HandleScheduling(name string, user *Models.User, w http.ResponseWriter) {
 				Code:    http.StatusUnauthorized,
 				Message: "Failed to Authorize with Google Calendar.",
 			}
-			err.ErrorAsJSON(w)
+			err.ErrorAsPlainText(w)
 		}
 
 		authUrl := u.generateTokenUrl(config)
+		authUrl = "<a style='color:black' target='_blank' href='" + authUrl + "'>" + authUrl + "</a>"
 		resp := Models.Error{
 			Status:  false,
 			Code:    http.StatusUnauthorized,
-			Message: "Google Calendar Not Linked! Click Here to Authorize " + authUrl,
+			Message: "Oops! You didn't link your Google Calendar Account! Click this url to link it!<br>" + authUrl,
 		}
-		resp.ErrorAsJSON(w)
+		resp.ErrorAsPlainText(w)
 		return
 	}
 
-	formattedTime := selectedTime.Format(time.RFC3339)
 	event := &calendar.Event{
 		Summary: results[0].TitleEnglish + " Episode " + strconv.Itoa(selectedIndex),
 		Start: &calendar.EventDateTime{
-			DateTime: formattedTime,
+			DateTime: selectedTime.Format(time.RFC3339),
 		},
 		End: &calendar.EventDateTime{
 			DateTime: selectedTime.Add(time.Duration(currentAnime.Duration) * time.Minute).Format(time.RFC3339),
@@ -160,25 +185,26 @@ func HandleScheduling(name string, user *Models.User, w http.ResponseWriter) {
 			Status:  false,
 			Code:    http.StatusBadRequest,
 			Message: "Failed to connect to google calendar."}
-		err.ErrorAsJSON(w)
+		err.ErrorAsPlainText(w)
 		return
 	}
 
-	_, err = u.AddEvent(event)
+	eventLink, err := u.AddEvent(event)
 	if err != nil {
-		fmt.Println(err)
 		err := Models.Error{
 			Status:  false,
 			Code:    http.StatusBadRequest,
 			Message: "Failed to add event to google calendar."}
-		err.ErrorAsJSON(w)
+		err.ErrorAsPlainText(w)
 		return
 	}
 
 	resp := Models.SchedulingResponse{}
 	resp.Status = true
 	resp.Code = http.StatusOK
-	resp.Message = "Next Episode at " + formattedTime + " Added to Calendar!\n"
+	formattedTime := humanize.Time(selectedTime)
+	eventLink = "<a style='color:black' target='_blank' href='" + eventLink + "'>" + eventLink + "</a>"
+	resp.Message = "🕐 Next Episode Airs <b>" + formattedTime + "</b>.<br>" + eventLink
 
 	RespondWithJSON(w, &resp)
 }

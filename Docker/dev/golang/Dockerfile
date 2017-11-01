@@ -7,3 +7,5 @@ RUN go get -u cloud.google.com/go/compute/metadata
 RUN go get -u github.com/joho/godotenv
 RUN go get -u gopkg.in/mgo.v2
 RUN go get -u github.com/satori/go.uuid
+RUN go get -u github.com/rs/cors
+RUN go get -u github.com/dustin/go-humanize

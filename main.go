@@ -8,6 +8,7 @@ import (
 	"os"
 	"github.com/melzareix/MrMeeseeksBot/Api"
 	"github.com/melzareix/MrMeeseeksBot/Models"
+	"github.com/rs/cors"
 )
 
 func StartServer() {
@@ -22,8 +23,9 @@ func StartServer() {
 	if port == "" {
 		port = "3000"
 	}
+	handler := cors.AllowAll().Handler(mux)
 	fmt.Println("Server started at http://localhost:" + port)
-	http.ListenAndServe(":"+port, mux)
+	http.ListenAndServe(":"+port, handler)
 }
 
 func ErrorHandler(w http.ResponseWriter, r *http.Request) {

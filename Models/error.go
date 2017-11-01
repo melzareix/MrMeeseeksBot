@@ -3,6 +3,7 @@ package Models
 import (
 	"encoding/json"
 	"net/http"
+	"fmt"
 )
 
 // JSON Error Message Model
@@ -18,4 +19,10 @@ func (err *Error) ErrorAsJSON(w http.ResponseWriter) {
 	w.WriteHeader(err.Code)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(&err)
+}
+
+func (err *Error) ErrorAsPlainText(w http.ResponseWriter) {
+	w.WriteHeader(err.Code)
+	w.Header().Set("Content-Type", "text/plain")
+	fmt.Fprintln(w, err.Message)
 }
