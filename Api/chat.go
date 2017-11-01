@@ -5,7 +5,6 @@ import (
 	"github.com/melzareix/MrMeeseeksBot/Database"
 	"github.com/melzareix/MrMeeseeksBot/Models"
 	"google.golang.org/api/calendar/v3"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
