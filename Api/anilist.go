@@ -7,6 +7,7 @@ import (
 	"time"
 	"log"
 	"strconv"
+	"os"
 )
 
 const (
@@ -18,11 +19,12 @@ const (
 
 type Anime struct {
 	Id            int      `json:"id"`
+	TitleEnglish string `json:"title_english"`
 	Genres        []string `json:"genres"`
 	ImageUrlMed   string   `json:"image_url_med"`
 	AiringStatus  string   `json:"airing_status"`
 	TotalEpisodes int      `json:"total_episodes"`
-	Duration      int      `json:"duration"`
+	Duration      int64      `json:"duration"`
 }
 
 type AniListClient struct {
@@ -129,6 +131,10 @@ func (c *AniListClient) GetAiringDates(id int) (map[string]int64, error) {
 
 // Create New AniListAPI Client from Credentials
 func NewAniListClient(client_id string, client_secret string) (*AniListClient, error) {
+	if client_id == "" && client_secret == "" {
+		client_id = os.Getenv("ANILIST_CLIENT_ID")
+		client_secret = os.Getenv("ANILIST_CLIENT_SECRET")
+	}
 	client := &AniListClient{client_id: client_id, client_secret: client_secret}
 	err := client.RefreshToken()
 	if err != nil {

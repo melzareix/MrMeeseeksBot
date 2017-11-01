@@ -15,7 +15,7 @@ func StartServer() {
 	mux.HandleFunc("/welcome", Api.WelcomeHandler)
 	mux.HandleFunc("/calendar/callback", Api.CalendarAuthorizationCallbackHandler)
 	mux.HandleFunc("/auth/calendar", Api.CalendarAuthorizationHandler)
-	mux.HandleFunc("/chat", nil)
+	mux.HandleFunc("/chat", Api.ChatHandler)
 	mux.HandleFunc("/", ErrorHandler)
 	port := os.Getenv("PORT")
 

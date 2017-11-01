@@ -4,10 +4,18 @@ import (
 	"net/http"
 	"github.com/melzareix/MrMeeseeksBot/Models"
 	"github.com/melzareix/MrMeeseeksBot/Database"
-	"encoding/json"
+	//"encoding/json"
 )
 
-// Handle the Welcome Route
+const (
+	WELCOME_MESSAGE = "Hello, I'm Mr Meseeks look at me ( ͡° ͜ʖ ͡°)!\n You can ask me to give you information about " +
+		"an anime, Recommend Anime or schedule the next episode of an anime." +
+		"\n==================================\nCOMMANDS\n==================================\n" +
+		" 1. Information [ANIME NAME]" +
+		" 2. Recommend [ANIME NAME]" +
+		" 3. Schedule [ANIME NAME]"
+)
+// Handle the WelcomeResponse Route
 func WelcomeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		err := Models.Error{
@@ -30,13 +38,10 @@ func WelcomeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u := Models.Welcome{Message: "Welcome!", Uuid: user.Uuid}
+	u := Models.WelcomeResponse{Uuid: user.Uuid}
+	u.Status = true
+	u.Code = http.StatusOK
+	u.Message = WELCOME_MESSAGE
+
 	RespondWithJSON(w, &u)
-}
-
-
-func RespondWithJSON(w http.ResponseWriter, u *Models.Welcome) {
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(&u)
 }

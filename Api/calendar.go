@@ -3,7 +3,6 @@ package Api
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/melzareix/MrMeeseeksBot/Database"
 	"github.com/melzareix/MrMeeseeksBot/Models"
 	"golang.org/x/oauth2"
@@ -15,11 +14,9 @@ import (
 
 type CalendarUser struct {
 	*Models.User
+	srv *calendar.Service
 }
 
-var (
-	srv *calendar.Service
-)
 
 // Google Calendar Events
 func (u *CalendarUser) generateTokenUrl(config *oauth2.Config) string {
@@ -50,30 +47,30 @@ func (u *CalendarUser) GetConfig() (*oauth2.Config, error) {
 	return config, nil
 }
 
-func (u *CalendarUser) GetCalendarService(code string) (*calendar.Service, error) {
+func (u *CalendarUser) SetCalendarService() error {
 	ctx := context.Background()
 	config, err := u.GetConfig()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	client := config.Client(ctx, u.Token)
 	srv, err := calendar.New(client)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return srv, nil
+	u.srv = srv
+	return nil
 }
 
 // Add Event to google calendar
-func (u *CalendarUser) AddEvent(event *calendar.Event) error {
+func (u *CalendarUser) AddEvent(event *calendar.Event) (string, error) {
 	calendarId := "primary"
-	event, err := srv.Events.Insert(calendarId, event).Do()
+	event, err := u.srv.Events.Insert(calendarId, event).Do()
 	if err != nil {
-		return err
+		return "", err
 	}
-	fmt.Printf("Event created: %s\n", event.HtmlLink)
-	return nil
+	return event.HtmlLink, nil
 }
 
 // Handle the Calendar Authorization
