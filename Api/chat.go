@@ -119,6 +119,30 @@ func HandleScheduling(name string, user *Models.User, w http.ResponseWriter) {
 	}
 
 	u := CalendarUser{User: user}
+
+	// No Token
+	// Send Response With OAuth link
+	if u.Token == nil {
+		config, err := u.GetConfig()
+		if err != nil {
+			err := Models.Error{
+				Status:  false,
+				Code:    http.StatusUnauthorized,
+				Message: "Failed to Authorize with Google Calendar.",
+			}
+			err.ErrorAsJSON(w)
+		}
+
+		authUrl := u.generateTokenUrl(config)
+		resp := Models.Error{
+			Status:  false,
+			Code:    http.StatusUnauthorized,
+			Message: "Google Calendar Not Linked! Click Here to Authorize " + authUrl,
+		}
+		resp.ErrorAsJSON(w)
+		return
+	}
+
 	formattedTime := selectedTime.Format(time.RFC3339)
 	event := &calendar.Event{
 		Summary: results[0].TitleEnglish + " Episode " + strconv.Itoa(selectedIndex),

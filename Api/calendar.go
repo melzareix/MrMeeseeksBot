@@ -2,7 +2,8 @@ package Api
 
 import (
 	"context"
-	"encoding/json"
+	//"encoding/json"
+	"fmt"
 	"github.com/melzareix/MrMeeseeksBot/Database"
 	"github.com/melzareix/MrMeeseeksBot/Models"
 	"golang.org/x/oauth2"
@@ -16,7 +17,6 @@ type CalendarUser struct {
 	*Models.User
 	srv *calendar.Service
 }
-
 
 // Google Calendar Events
 func (u *CalendarUser) generateTokenUrl(config *oauth2.Config) string {
@@ -145,6 +145,7 @@ func CalendarAuthorizationCallbackHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(&u)
+	w.Header().Set("Content-Type", "text/html")
+	fmt.Fprintln(w, "<html><body><strong>Google Calendar Authorized! You may close this window " +
+		"and go back to the chat bot!</body></html>")
 }
