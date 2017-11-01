@@ -66,7 +66,7 @@ func HandleMessage(message string, user *Models.User, w http.ResponseWriter) {
 		err := Models.Error{
 			Status:  false,
 			Code:    http.StatusBadRequest,
-			Message: "Invalid Command"}
+			Message: COMMANDS}
 		err.ErrorAsPlainText(w)
 	}
 }

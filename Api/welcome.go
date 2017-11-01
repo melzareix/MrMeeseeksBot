@@ -9,11 +9,12 @@ import (
 
 const (
 	WELCOME_MESSAGE = "Hello, I'm <b>Mr Meseeks</b> look at me! <br> You can ask me to give you information about " +
-		"an anime, Recommend Anime or schedule the next episode of an anime." +
-		"<br>==================================<br><b>COMMANDS</b><br>==================================<br>" +
+		"an anime, Recommend Anime or schedule the next episode of an anime." + COMMANDS
+	COMMANDS = "<br>==================================<br><b>COMMANDS</b><br>==================================<br>" +
 		" 1. Show Information [ANIME NAME]<br>" +
 		" 2. Recommend [ANIME NAME]<br>" +
 		" 3. Schedule [ANIME NAME]<br>"
+
 )
 // Handle the WelcomeResponse Route
 func WelcomeHandler(w http.ResponseWriter, r *http.Request) {
