@@ -12,7 +12,7 @@ services:
   golang:
     build: 
       context: .
-      dockerfile: ./Docker/dev/golang/dockerfile
+      dockerfile: ./Docker/dev/golang/Dockerfile
     container_name: meseeks_golang
     ports:
      - 3000:3000
