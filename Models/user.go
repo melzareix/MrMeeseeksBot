@@ -1,10 +1,18 @@
 package Models
 
+import (
+	"golang.org/x/oauth2"
+	"github.com/satori/go.uuid"
+)
+
+
 // Chat bot User Model
 type User struct {
 	Uuid string `json:"uuid"`
-	AccessToken string `json:"access_token"`
-	TokenType string `json:"token_type"`
-	RefreshToken string `json:"refresh_token"`
-	Expiry string `json:"expiry"`
+	Token *oauth2.Token `json:"token"`
+}
+
+func NewUser() *User {
+	uniqueId := uuid.NewV4().String()
+	return &User{Uuid: uniqueId}
 }
