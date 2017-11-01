@@ -50,7 +50,12 @@ func HandleMessage(message string, user *Models.User, w http.ResponseWriter) {
 func HandleScheduling(name string, user *Models.User, w http.ResponseWriter) {
 	client, err := NewAniListClient("", "")
 	if err != nil {
-		log.Fatal(err)
+		err := Models.Error{
+			Status:  false,
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to connect to API."}
+		err.ErrorAsJSON(w)
+		return
 	}
 
 	results, err := client.Search(name)
