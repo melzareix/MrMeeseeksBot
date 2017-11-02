@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"math/rand"
 	"github.com/dustin/go-humanize"
 )
 
@@ -62,6 +63,8 @@ func HandleMessage(message string, user *Models.User, w http.ResponseWriter) {
 	switch command {
 	case "schedule":
 		HandleScheduling(strings.Join(msg[1:], " "), user, w)
+	case "recommend":
+		HandleRecommendation(strings.Join(msg[1:],""),w)
 	default:
 		err := Models.Error{
 			Status:  false,
@@ -208,3 +211,45 @@ func HandleScheduling(name string, user *Models.User, w http.ResponseWriter) {
 
 	RespondWithJSON(w, &resp)
 }
+
+func HandleRecommendation(name string,w http.ResponseWriter){
+	client, err := NewAniListClient("", "")
+
+	if err != nil {
+		err := Models.Error{
+			Status:  false,
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to connect to API."}
+		err.ErrorAsPlainText(w)
+		return
+	}
+	results, err := client.Search(name)
+	log.Println(name);
+	if err != nil {
+		err := Models.Error{
+			Status:  false,
+			Code:    http.StatusBadRequest,
+			Message: "No Results for " + name + "."}
+		err.ErrorAsPlainText(w)
+		return
+	}
+	genre_number := Randomize(len(results[0].Genres))
+	anotherResult,_ := client.Recommended(results[0].Genres[genre_number])
+
+	recommended_number :=Randomize(len(anotherResult))
+	recommended_anime := anotherResult[recommended_number].TitleEnglish
+
+	resp := Models.SchedulingResponse{}
+	resp.Status = true
+	resp.Code = http.StatusOK
+	resp.Message = "<b> I am Mr.Meseeks</b> and I recommend that you watch " + recommended_anime + "<br>"
+
+	RespondWithJSON(w,&resp)
+
+
+}
+
+func Randomize(upperBound int )(result int ){
+	result = int(rand.Float64()*float64(upperBound))
+	return
+	}
