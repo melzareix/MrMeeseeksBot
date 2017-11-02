@@ -224,7 +224,7 @@ func HandleRecommendation(name string,w http.ResponseWriter){
 		return
 	}
 	results, err := client.Search(name)
-	log.Println(name);
+
 	if err != nil {
 		err := Models.Error{
 			Status:  false,
@@ -233,6 +233,7 @@ func HandleRecommendation(name string,w http.ResponseWriter){
 		err.ErrorAsPlainText(w)
 		return
 	}
+
 	genre_number := Randomize(len(results[0].Genres))
 	anotherResult,_ := client.Recommended(results[0].Genres[genre_number])
 
