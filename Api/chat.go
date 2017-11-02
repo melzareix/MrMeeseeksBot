@@ -64,7 +64,7 @@ func HandleMessage(message string, user *Models.User, w http.ResponseWriter) {
 	case "schedule":
 		HandleScheduling(strings.Join(msg[1:], " "), user, w)
 	case "recommend":
-		HandleRecommendation(strings.Join(msg[1:],""),w)
+		HandleRecommendation(strings.Join(msg[1:]," "),w)
 	default:
 		err := Models.Error{
 			Status:  false,
