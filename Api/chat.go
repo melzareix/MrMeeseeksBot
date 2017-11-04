@@ -14,6 +14,7 @@ import (
 	"github.com/dustin/go-humanize"
 )
 
+
 func ChatHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodOptions {
@@ -229,16 +230,16 @@ func HandleRecommendation(name string,w http.ResponseWriter){
 		err := Models.Error{
 			Status:  false,
 			Code:    http.StatusBadRequest,
-			Message: "No Results for " + name + "."}
+			Message: "No Recommendations for " + name + "."}
 		err.ErrorAsPlainText(w)
 		return
 	}
 
 	genre_number := Randomize(len(results[0].Genres))
-	anotherResult,_ := client.Recommended(results[0].Genres[genre_number])
+	recommendations,_ := client.Recommended(results[0].Genres[genre_number])
 
-	recommended_number :=Randomize(len(anotherResult))
-	recommended_anime := anotherResult[recommended_number].TitleEnglish
+	recommended_number :=Randomize(len(recommendations))
+	recommended_anime := recommendations[recommended_number].TitleEnglish
 
 	resp := Models.SchedulingResponse{}
 	resp.Status = true
