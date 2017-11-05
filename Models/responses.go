@@ -18,3 +18,7 @@ type SchedulingResponse struct{
 type RecommendationResponse struct {
 	GeneralResponse
 }
+
+type AnimeDetailResponse struct {
+	 GeneralResponse
+}
