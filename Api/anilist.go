@@ -23,6 +23,7 @@ type Anime struct {
 	TitleEnglish string `json:"title_english"`
 	Genres        []string `json:"genres"`
 	ImageUrlMed   string   `json:"image_url_med"`
+	ImageUrlLge   string    `json:"image_url_lge"`
 	AiringStatus  string   `json:"airing_status"`
 	TotalEpisodes int      `json:"total_episodes"`
 	Duration      int64      `json:"duration"`

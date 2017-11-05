@@ -239,12 +239,13 @@ func HandleRecommendation(name string,w http.ResponseWriter){
 	recommendations,_ := client.Recommended(results[0].Genres[genre_number])
 
 	recommended_number :=Randomize(len(recommendations))
-	recommended_anime := recommendations[recommended_number].TitleEnglish
+	recommended_anime := recommendations[recommended_number]
 
 	resp := Models.SchedulingResponse{}
 	resp.Status = true
 	resp.Code = http.StatusOK
-	resp.Message = "<b> I am Mr.Meseeks</b> and I recommend that you watch " + recommended_anime + "<br>"
+	resp.Message = "<b> I am Mr.Meseeks</b> and I recommend that you watch " + recommended_anime.TitleEnglish +
+		"<br>Here is an image of the anime :<br><img  src="+recommended_anime.ImageUrlLge+">"
 
 	RespondWithJSON(w,&resp)
 
