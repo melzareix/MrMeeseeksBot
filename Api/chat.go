@@ -256,7 +256,7 @@ func HandleRecommendation(name string, w http.ResponseWriter) {
 }
 
 func HandleAnimeDetails(name string, w http.ResponseWriter) {
-	client, err := NewAniListClient("imaginary-kpfkw", "tCColbzKT3xeiW7Tmkn");
+	client, err := NewAniListClient("", "");
 
 	if err != nil {
 		err := Models.Error{
