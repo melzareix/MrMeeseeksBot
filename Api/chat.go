@@ -2,18 +2,19 @@ package Api
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/dustin/go-humanize"
 	"github.com/melzareix/MrMeeseeksBot/Database"
 	"github.com/melzareix/MrMeeseeksBot/Models"
 	"google.golang.org/api/calendar/v3"
 	"log"
+	"math/rand"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
-	"math/rand"
-	"github.com/dustin/go-humanize"
 )
-
 
 func ChatHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -65,7 +66,7 @@ func HandleMessage(message string, user *Models.User, w http.ResponseWriter) {
 	case "schedule":
 		HandleScheduling(strings.Join(msg[1:], " "), user, w)
 	case "recommend":
-		HandleRecommendation(strings.Join(msg[1:]," "),w)
+		HandleRecommendation(strings.Join(msg[1:], " "), w)
 	default:
 		err := Models.Error{
 			Status:  false,
@@ -213,7 +214,7 @@ func HandleScheduling(name string, user *Models.User, w http.ResponseWriter) {
 	RespondWithJSON(w, &resp)
 }
 
-func HandleRecommendation(name string,w http.ResponseWriter){
+func HandleRecommendation(name string, w http.ResponseWriter) {
 	client, err := NewAniListClient("", "")
 
 	if err != nil {
@@ -235,24 +236,24 @@ func HandleRecommendation(name string,w http.ResponseWriter){
 		return
 	}
 
-	genre_number := Randomize(len(results[0].Genres))
-	recommendations,_ := client.Recommended(results[0].Genres[genre_number])
+	genreNumber := Randomize(len(results[0].Genres))
+	recommendations, _ := client.Recommended(results[0].Genres[genreNumber])
 
-	recommended_number :=Randomize(len(recommendations))
-	recommended_anime := recommendations[recommended_number]
+	recommendedNumber := Randomize(len(recommendations))
+	recommendedAnime := recommendations[recommendedNumber]
 
 	resp := Models.SchedulingResponse{}
+	animeListUrl := "https://myanimelist.net/search/all?q=" + url.QueryEscape(recommendedAnime.TitleEnglish)
 	resp.Status = true
 	resp.Code = http.StatusOK
-	resp.Message = "<b> I am Mr.Meseeks</b> and I recommend that you watch " + recommended_anime.TitleEnglish +
-		"<br>Here is an image of the anime :<br><img  src="+recommended_anime.ImageUrlLge+">"
-
-	RespondWithJSON(w,&resp)
-
+	resp.Message = fmt.Sprintf("<b> I am Mr.Meseeks</b>, and I recommend that you watch<br><h4><a "+
+		"target='_blank' style='color: black' href='%s'>%s</a></h4><img src='%s'/>",
+		animeListUrl, recommendedAnime.TitleEnglish, recommendedAnime.ImageUrlLge)
+	RespondWithJSON(w, &resp)
 
 }
 
-func Randomize(upperBound int )(result int ){
-	result = int(rand.Float64()*float64(upperBound))
+func Randomize(upperBound int) (result int) {
+	result = int(rand.Float64() * float64(upperBound))
 	return
-	}
+}
