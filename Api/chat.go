@@ -256,7 +256,7 @@ func HandleRecommendation(name string, w http.ResponseWriter) {
 }
 
 func HandleAnimeDetails(name string, w http.ResponseWriter) {
-	client, err := NewAniListClient("", "");
+	client, err := NewAniListClient("imaginary-kpfkw", "tCColbzKT3xeiW7Tmkn");
 
 	if err != nil {
 		err := Models.Error{
@@ -286,7 +286,21 @@ func HandleAnimeDetails(name string, w http.ResponseWriter) {
 		return
 	}
 
-	RespondWithJSON(w, results)
+	top := results[0];
+	resp := Models.AnimeDetailResponse{}
+	resp.Status = true
+	resp.Code = http.StatusOK
+	resp.Message = fmt.Sprintf("<b>Oh Yeaah !</b> Here are %s's Details<br>" +
+		"<img src='%s' alt='Anime Image' align='right'>" +
+		"<ul><li><b>Description:</b> %s</li>" +
+			"<li><b>Total Episodes:</b> %d</li>" +
+				"<li><b>Duration:</b> %d<br></li>" +
+					"<li><b>Airing Status:</b> %s</li>" +
+						"<li><b>Average Score:</b> %f</li></ul>",
+							top.TitleEnglish, top.ImageUrlMed,
+								top.Description, top.TotalEpisodes,
+									top.Duration, top.AiringStatus, top.AverageScore)
+	RespondWithJSON(w, &resp)
 }
 
 func Randomize(upperBound int) (result int) {
