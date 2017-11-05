@@ -27,6 +27,8 @@ type Anime struct {
 	AiringStatus  string   `json:"airing_status"`
 	TotalEpisodes int      `json:"total_episodes"`
 	Duration      int64      `json:"duration"`
+	AverageScore float32 `json:"average_score"`
+	Description string `json:"description"`
 }
 
 type AniListClient struct {
@@ -75,6 +77,7 @@ func (c *AniListClient) RefreshToken() error {
 
 	resp := &AniListAuthResponse{}
 	err = json.NewDecoder(req.Body).Decode(&resp)
+
 	if err != nil {
 		return err
 	}
@@ -165,6 +168,7 @@ func NewAniListClient(client_id string, client_secret string) (*AniListClient, e
 	}
 	client := &AniListClient{client_id: client_id, client_secret: client_secret}
 	err := client.RefreshToken()
+
 	if err != nil {
 		return nil, err
 	}

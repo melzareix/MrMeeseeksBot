@@ -67,6 +67,8 @@ func HandleMessage(message string, user *Models.User, w http.ResponseWriter) {
 		HandleScheduling(strings.Join(msg[1:], " "), user, w)
 	case "recommend":
 		HandleRecommendation(strings.Join(msg[1:], " "), w)
+	case "show":
+		HandleAnimeDetails(strings.Join(msg[2:], " "), w);
 	default:
 		err := Models.Error{
 			Status:  false,
@@ -251,6 +253,40 @@ func HandleRecommendation(name string, w http.ResponseWriter) {
 		animeListUrl, recommendedAnime.TitleEnglish, recommendedAnime.ImageUrlLge)
 	RespondWithJSON(w, &resp)
 
+}
+
+func HandleAnimeDetails(name string, w http.ResponseWriter) {
+	client, err := NewAniListClient("", "");
+
+	if err != nil {
+		err := Models.Error{
+			Status:  false,
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to connect to API."}
+		err.ErrorAsPlainText(w)
+		return
+	}
+	results, err := client.Search(name)
+
+	if err != nil {
+		err := Models.Error{
+			Status:  false,
+			Code:    http.StatusBadRequest,
+			Message: "No Results for Anime " + name + "."}
+		err.ErrorAsPlainText(w)
+		return
+	}
+
+	if len(results) == 0 {
+		err := Models.Error{
+			Status:  false,
+			Code:    http.StatusBadRequest,
+			Message: "No Results for Anime " + name + "."}
+		err.ErrorAsPlainText(w)
+		return
+	}
+
+	RespondWithJSON(w, results)
 }
 
 func Randomize(upperBound int) (result int) {
