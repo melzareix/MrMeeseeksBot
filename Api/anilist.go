@@ -15,6 +15,7 @@ const (
 	ANILIST_AUTH_URL   = ANILIST_BASE_URL + "auth/access_token"
 	ANILIST_SEARCH_URL = ANILIST_BASE_URL + "anime/search/"
 	ANILIST_AIRING_URL = ANILIST_BASE_URL + "anime/"
+	ANILIST_GENRE_SEARCH = ANILIST_BASE_URL + "browse/anime?genres="
 )
 
 type Anime struct {
@@ -22,6 +23,7 @@ type Anime struct {
 	TitleEnglish string `json:"title_english"`
 	Genres        []string `json:"genres"`
 	ImageUrlMed   string   `json:"image_url_med"`
+	ImageUrlLge   string    `json:"image_url_lge"`
 	AiringStatus  string   `json:"airing_status"`
 	TotalEpisodes int      `json:"total_episodes"`
 	Duration      int64      `json:"duration"`
@@ -98,6 +100,32 @@ func (c *AniListClient) Search(name string) ([]Anime, error) {
 
 	var results []Anime
 	log.Println(search_url)
+
+	err = json.NewDecoder(resp.Body).Decode(&results)
+	if err != nil {
+		return nil, err
+	}
+	return results, nil
+}
+
+func (c *AniListClient) Recommended(genre string) ([]Anime, error) {
+
+	url :=  ANILIST_GENRE_SEARCH + url.PathEscape(genre)
+
+	url, err := setAccessToken(c, url)
+
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := http.Get(url)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var results []Anime
+	log.Println(url)
 
 	err = json.NewDecoder(resp.Body).Decode(&results)
 	if err != nil {

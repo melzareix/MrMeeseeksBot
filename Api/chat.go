@@ -2,15 +2,18 @@ package Api
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/dustin/go-humanize"
 	"github.com/melzareix/MrMeeseeksBot/Database"
 	"github.com/melzareix/MrMeeseeksBot/Models"
 	"google.golang.org/api/calendar/v3"
 	"log"
+	"math/rand"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
-	"github.com/dustin/go-humanize"
 )
 
 func ChatHandler(w http.ResponseWriter, r *http.Request) {
@@ -62,6 +65,8 @@ func HandleMessage(message string, user *Models.User, w http.ResponseWriter) {
 	switch command {
 	case "schedule":
 		HandleScheduling(strings.Join(msg[1:], " "), user, w)
+	case "recommend":
+		HandleRecommendation(strings.Join(msg[1:], " "), w)
 	default:
 		err := Models.Error{
 			Status:  false,
@@ -207,4 +212,48 @@ func HandleScheduling(name string, user *Models.User, w http.ResponseWriter) {
 	resp.Message = "🕐 Next Episode Airs <b>" + formattedTime + "</b>.<br>" + eventLink
 
 	RespondWithJSON(w, &resp)
+}
+
+func HandleRecommendation(name string, w http.ResponseWriter) {
+	client, err := NewAniListClient("", "")
+
+	if err != nil {
+		err := Models.Error{
+			Status:  false,
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to connect to API."}
+		err.ErrorAsPlainText(w)
+		return
+	}
+	results, err := client.Search(name)
+
+	if err != nil {
+		err := Models.Error{
+			Status:  false,
+			Code:    http.StatusBadRequest,
+			Message: "No Recommendations for " + name + "."}
+		err.ErrorAsPlainText(w)
+		return
+	}
+
+	genreNumber := Randomize(len(results[0].Genres))
+	recommendations, _ := client.Recommended(results[0].Genres[genreNumber])
+
+	recommendedNumber := Randomize(len(recommendations))
+	recommendedAnime := recommendations[recommendedNumber]
+
+	resp := Models.SchedulingResponse{}
+	animeListUrl := "https://myanimelist.net/search/all?q=" + url.QueryEscape(recommendedAnime.TitleEnglish)
+	resp.Status = true
+	resp.Code = http.StatusOK
+	resp.Message = fmt.Sprintf("<b> I am Mr.Meseeks</b>, and I recommend that you watch<br><h4><a "+
+		"target='_blank' style='color: black' href='%s'>%s</a></h4><img src='%s'/>",
+		animeListUrl, recommendedAnime.TitleEnglish, recommendedAnime.ImageUrlLge)
+	RespondWithJSON(w, &resp)
+
+}
+
+func Randomize(upperBound int) (result int) {
+	result = int(rand.Float64() * float64(upperBound))
+	return
 }

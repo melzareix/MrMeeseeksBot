@@ -14,3 +14,7 @@ type WelcomeResponse struct {
 type SchedulingResponse struct{
 	GeneralResponse
 }
+
+type RecommendationResponse struct {
+	GeneralResponse
+}
