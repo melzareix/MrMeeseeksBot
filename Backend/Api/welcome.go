@@ -2,8 +2,9 @@ package Api
 
 import (
 	"net/http"
-	"github.com/melzareix/MrMeeseeksBot/Models"
-	"github.com/melzareix/MrMeeseeksBot/Database"
+
+	"github.com/melzareix/MrMeeseeksBot/Backend/Database"
+	"github.com/melzareix/MrMeeseeksBot/Backend/Models"
 	//"encoding/json"
 )
 
@@ -14,13 +15,13 @@ const (
 		" 1. Show Information [ANIME NAME]<br>" +
 		" 2. Recommend [ANIME NAME]<br>" +
 		" 3. Schedule [ANIME NAME]<br>"
-
 )
+
 // Handle the WelcomeResponse Route
 func WelcomeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		err := Models.Error{
-			Status: false,
+			Status:  false,
 			Code:    http.StatusMethodNotAllowed,
 			Message: r.Method + " Method Not Allowed. Only GET requests are allowed."}
 		err.ErrorAsPlainText(w)
@@ -32,7 +33,7 @@ func WelcomeHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		err := Models.Error{
-			Status: false,
+			Status:  false,
 			Code:    http.StatusBadRequest,
 			Message: "Failed to create user."}
 		err.ErrorAsPlainText(w)

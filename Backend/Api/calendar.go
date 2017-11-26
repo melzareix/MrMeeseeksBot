@@ -4,13 +4,14 @@ import (
 	"context"
 	//"encoding/json"
 	"fmt"
-	"github.com/melzareix/MrMeeseeksBot/Database"
-	"github.com/melzareix/MrMeeseeksBot/Models"
+	"io/ioutil"
+	"net/http"
+
+	"github.com/melzareix/MrMeeseeksBot/Backend/Database"
+	"github.com/melzareix/MrMeeseeksBot/Backend/Models"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/calendar/v3"
-	"io/ioutil"
-	"net/http"
 )
 
 type CalendarUser struct {
@@ -146,6 +147,6 @@ func CalendarAuthorizationCallbackHandler(w http.ResponseWriter, r *http.Request
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "text/html")
-	fmt.Fprintln(w, "<html><body><strong>Google Calendar Authorized! You may close this window " +
+	fmt.Fprintln(w, "<html><body><strong>Google Calendar Authorized! You may close this window "+
 		"and go back to the chat bot!</body></html>")
 }

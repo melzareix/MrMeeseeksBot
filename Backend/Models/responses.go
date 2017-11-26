@@ -1,8 +1,8 @@
 package Models
 
 type GeneralResponse struct {
-	Status bool `json:"status"`
-	Code int `json:"code"`
+	Status  bool   `json:"status"`
+	Code    int    `json:"code"`
 	Message string `json:"message"`
 }
 
@@ -11,7 +11,7 @@ type WelcomeResponse struct {
 	Uuid string `json:"uuid"`
 }
 
-type SchedulingResponse struct{
+type SchedulingResponse struct {
 	GeneralResponse
 }
 
@@ -20,5 +20,6 @@ type RecommendationResponse struct {
 }
 
 type AnimeDetailResponse struct {
-	 GeneralResponse
+	GeneralResponse
+	ImageURL string `json:"imageURL"`
 }

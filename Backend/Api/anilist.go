@@ -2,33 +2,33 @@ package Api
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"net/url"
-	"time"
-	"log"
-	"strconv"
 	"os"
+	"strconv"
+	"time"
 )
 
 const (
-	ANILIST_BASE_URL   = "https://anilist.co/api/"
-	ANILIST_AUTH_URL   = ANILIST_BASE_URL + "auth/access_token"
-	ANILIST_SEARCH_URL = ANILIST_BASE_URL + "anime/search/"
-	ANILIST_AIRING_URL = ANILIST_BASE_URL + "anime/"
+	ANILIST_BASE_URL     = "https://anilist.co/api/"
+	ANILIST_AUTH_URL     = ANILIST_BASE_URL + "auth/access_token"
+	ANILIST_SEARCH_URL   = ANILIST_BASE_URL + "anime/search/"
+	ANILIST_AIRING_URL   = ANILIST_BASE_URL + "anime/"
 	ANILIST_GENRE_SEARCH = ANILIST_BASE_URL + "browse/anime?genres="
 )
 
 type Anime struct {
 	Id            int      `json:"id"`
-	TitleEnglish string `json:"title_english"`
+	TitleEnglish  string   `json:"title_english"`
 	Genres        []string `json:"genres"`
 	ImageUrlMed   string   `json:"image_url_med"`
-	ImageUrlLge   string    `json:"image_url_lge"`
+	ImageUrlLge   string   `json:"image_url_lge"`
 	AiringStatus  string   `json:"airing_status"`
 	TotalEpisodes int      `json:"total_episodes"`
-	Duration      int64      `json:"duration"`
-	AverageScore float32 `json:"average_score"`
-	Description string `json:"description"`
+	Duration      int64    `json:"duration"`
+	AverageScore  float32  `json:"average_score"`
+	Description   string   `json:"description"`
 }
 
 type AniListClient struct {
@@ -90,7 +90,7 @@ func (c *AniListClient) RefreshToken() error {
 // Search for a certain Anime
 func (c *AniListClient) Search(name string) ([]Anime, error) {
 
-	search_url :=  ANILIST_SEARCH_URL + url.PathEscape(name)
+	search_url := ANILIST_SEARCH_URL + url.PathEscape(name)
 	search_url, err := setAccessToken(c, search_url)
 	if err != nil {
 		return nil, err
@@ -113,7 +113,7 @@ func (c *AniListClient) Search(name string) ([]Anime, error) {
 
 func (c *AniListClient) Recommended(genre string) ([]Anime, error) {
 
-	url :=  ANILIST_GENRE_SEARCH + url.PathEscape(genre)
+	url := ANILIST_GENRE_SEARCH + url.PathEscape(genre)
 
 	url, err := setAccessToken(c, url)
 

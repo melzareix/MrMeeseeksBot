@@ -3,10 +3,6 @@ package Api
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/dustin/go-humanize"
-	"github.com/melzareix/MrMeeseeksBot/Database"
-	"github.com/melzareix/MrMeeseeksBot/Models"
-	"google.golang.org/api/calendar/v3"
 	"log"
 	"math/rand"
 	"net/http"
@@ -14,6 +10,11 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/dustin/go-humanize"
+	"github.com/melzareix/MrMeeseeksBot/Backend/Database"
+	"github.com/melzareix/MrMeeseeksBot/Backend/Models"
+	"google.golang.org/api/calendar/v3"
 )
 
 func ChatHandler(w http.ResponseWriter, r *http.Request) {
@@ -68,7 +69,7 @@ func HandleMessage(message string, user *Models.User, w http.ResponseWriter) {
 	case "recommend":
 		HandleRecommendation(strings.Join(msg[1:], " "), w)
 	case "show":
-		HandleAnimeDetails(strings.Join(msg[2:], " "), w);
+		HandleAnimeDetails(strings.Join(msg[2:], " "), w)
 	default:
 		err := Models.Error{
 			Status:  false,
@@ -256,7 +257,7 @@ func HandleRecommendation(name string, w http.ResponseWriter) {
 }
 
 func HandleAnimeDetails(name string, w http.ResponseWriter) {
-	client, err := NewAniListClient("", "");
+	client, err := NewAniListClient("", "")
 
 	if err != nil {
 		err := Models.Error{
@@ -286,20 +287,20 @@ func HandleAnimeDetails(name string, w http.ResponseWriter) {
 		return
 	}
 
-	top := results[0];
+	top := results[0]
 	resp := Models.AnimeDetailResponse{}
 	resp.Status = true
 	resp.Code = http.StatusOK
-	resp.Message = fmt.Sprintf("<b>Oh Yeaah !</b> Here are %s's Details<br>" +
-		"<img src='%s' alt='Anime Image' align='right'>" +
-		"<ul><li><b>Description:</b> %s</li>" +
-			"<li><b>Total Episodes:</b> %d</li>" +
-				"<li><b>Duration:</b> %d<br></li>" +
-					"<li><b>Airing Status:</b> %s</li>" +
-						"<li><b>Average Score:</b> %f</li></ul>",
-							top.TitleEnglish, top.ImageUrlMed,
-								top.Description, top.TotalEpisodes,
-									top.Duration, top.AiringStatus, top.AverageScore)
+	resp.Message = fmt.Sprintf("Oh Yeaah !\nHere are %s's Details\n"+
+		"Description: %s"+
+		"Total Episodes: %d"+
+		"Duration: %d"+
+		"Airing Status: %s"+
+		"Average Score: %f",
+		top.TitleEnglish,
+		top.Description, top.TotalEpisodes,
+		top.Duration, top.AiringStatus, top.AverageScore)
+	resp.ImageURL = top.ImageUrlMed
 	RespondWithJSON(w, &resp)
 }
 
