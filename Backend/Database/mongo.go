@@ -2,8 +2,9 @@ package Database
 
 import (
 	"os"
+
+	"github.com/melzareix/MrMeeseeksBot/Backend/Models"
 	"gopkg.in/mgo.v2"
-	"github.com/melzareix/MrMeeseeksBot/Models"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -13,7 +14,7 @@ var (
 
 const (
 	USERS_COLLECTION = "users"
-	DB_NAME = "MrMeseeks"
+	DB_NAME          = "MrMeseeks"
 )
 
 type Mongo struct {
@@ -21,7 +22,7 @@ type Mongo struct {
 }
 
 // Connect to MongoDB Server
-func (db *Mongo) Connect() error{
+func (db *Mongo) Connect() error {
 	MONGO_URL := os.Getenv("MONGO_URL")
 	session, err := mgo.Dial(MONGO_URL)
 
@@ -33,7 +34,7 @@ func (db *Mongo) Connect() error{
 }
 
 // Create A New User
-func (db *Mongo) CreateUser(u *Models.User) (error){
+func (db *Mongo) CreateUser(u *Models.User) error {
 	session := db.session.Copy()
 	defer session.Close()
 

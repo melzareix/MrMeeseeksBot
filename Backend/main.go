@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/joho/godotenv"
-	"github.com/melzareix/MrMeeseeksBot/Database"
 	"net/http"
 	"os"
-	"github.com/melzareix/MrMeeseeksBot/Api"
-	"github.com/melzareix/MrMeeseeksBot/Models"
+
+	"github.com/joho/godotenv"
+	"github.com/melzareix/MrMeeseeksBot/Backend/Api"
+	"github.com/melzareix/MrMeeseeksBot/Backend/Database"
+	"github.com/melzareix/MrMeeseeksBot/Backend/Models"
 	"github.com/rs/cors"
 )
 
