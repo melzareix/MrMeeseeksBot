@@ -81,7 +81,7 @@ func CalendarAuthorizationHandler(w http.ResponseWriter, r *http.Request) {
 			Status:  false,
 			Code:    http.StatusMethodNotAllowed,
 			Message: r.Method + " Method Not Allowed. Only GET requests are allowed."}
-		err.ErrorAsPlainText(w)
+		err.ErrorAsJSON(w)
 		return
 	}
 
@@ -92,7 +92,7 @@ func CalendarAuthorizationHandler(w http.ResponseWriter, r *http.Request) {
 			Status:  false,
 			Code:    http.StatusBadRequest,
 			Message: "User " + userUuid + " not found."}
-		err.ErrorAsPlainText(w)
+		err.ErrorAsJSON(w)
 		return
 	}
 
@@ -103,7 +103,7 @@ func CalendarAuthorizationHandler(w http.ResponseWriter, r *http.Request) {
 			Status:  false,
 			Code:    http.StatusBadRequest,
 			Message: err.Error()}
-		err.ErrorAsPlainText(w)
+		err.ErrorAsJSON(w)
 		return
 	}
 	http.Redirect(w, r, calendarUser.generateTokenUrl(config), http.StatusTemporaryRedirect)
@@ -120,7 +120,7 @@ func CalendarAuthorizationCallbackHandler(w http.ResponseWriter, r *http.Request
 			Status:  false,
 			Code:    http.StatusBadRequest,
 			Message: "User " + userUuid + " not found."}
-		err.ErrorAsPlainText(w)
+		err.ErrorAsJSON(w)
 		return
 	}
 
@@ -131,7 +131,7 @@ func CalendarAuthorizationCallbackHandler(w http.ResponseWriter, r *http.Request
 			Status:  false,
 			Code:    http.StatusBadRequest,
 			Message: err.Error()}
-		err.ErrorAsPlainText(w)
+		err.ErrorAsJSON(w)
 		return
 	}
 
@@ -141,7 +141,7 @@ func CalendarAuthorizationCallbackHandler(w http.ResponseWriter, r *http.Request
 			Status:  false,
 			Code:    http.StatusBadRequest,
 			Message: err.Error()}
-		err.ErrorAsPlainText(w)
+		err.ErrorAsJSON(w)
 		return
 	}
 

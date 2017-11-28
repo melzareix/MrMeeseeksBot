@@ -17,8 +17,8 @@ services:
     ports:
      - 3000:3000
     volumes:
-     - ./:/go/src/github.com/melzareix/Backend/MrMeeseeksBot
-    working_dir: /go/src/github.com/melzareix/Backend/MrMeeseeksBot
+     - ./:/go/src/github.com/melzareix/MrMeeseeksBot/Backend
+    working_dir: /go/src/github.com/melzareix/MrMeeseeksBot/Backend
     depends_on:
       - mongodb
     command: "fresh"

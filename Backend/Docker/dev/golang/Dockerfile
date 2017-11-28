@@ -9,3 +9,4 @@ RUN go get -u gopkg.in/mgo.v2
 RUN go get -u github.com/satori/go.uuid
 RUN go get -u github.com/rs/cors
 RUN go get -u github.com/dustin/go-humanize
+RUN go get github.com/grokify/html-strip-tags-go

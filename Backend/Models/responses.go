@@ -17,9 +17,12 @@ type SchedulingResponse struct {
 
 type RecommendationResponse struct {
 	GeneralResponse
+	AnimeTitle string `json:"anime_title"`
+	ImageURL string `json:"imageURL"`
 }
 
 type AnimeDetailResponse struct {
 	GeneralResponse
+	AnimeTitle string `json:"anime_title"`
 	ImageURL string `json:"imageURL"`
 }

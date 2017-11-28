@@ -9,12 +9,12 @@ import (
 )
 
 const (
-	WELCOME_MESSAGE = "Hello, I'm <b>Mr Meseeks</b> look at me! <br> You can ask me to give you information about " +
-		"an anime, Recommend Anime or schedule the next episode of an anime." + COMMANDS
-	COMMANDS = "<br>==================================<br><b>COMMANDS</b><br>==================================<br>" +
-		" 1. Show Information [ANIME NAME]<br>" +
-		" 2. Recommend [ANIME NAME]<br>" +
-		" 3. Schedule [ANIME NAME]<br>"
+	WELCOME_MESSAGE = "I'm Mr Meseeks look at me!\n\n I can show you info about an anime, " +
+		"recommend and schedule an anime.\n\n" + COMMANDS
+	COMMANDS = "Example Commands:\n" +
+		"Show Info Death Note\n" +
+		"Recommend Death Note\n" +
+		"Schedule Inuyashiki"
 )
 
 // Handle the WelcomeResponse Route
@@ -24,7 +24,7 @@ func WelcomeHandler(w http.ResponseWriter, r *http.Request) {
 			Status:  false,
 			Code:    http.StatusMethodNotAllowed,
 			Message: r.Method + " Method Not Allowed. Only GET requests are allowed."}
-		err.ErrorAsPlainText(w)
+		err.ErrorAsJSON(w)
 		return
 	}
 
@@ -36,7 +36,7 @@ func WelcomeHandler(w http.ResponseWriter, r *http.Request) {
 			Status:  false,
 			Code:    http.StatusBadRequest,
 			Message: "Failed to create user."}
-		err.ErrorAsPlainText(w)
+		err.ErrorAsJSON(w)
 		return
 	}
 

@@ -15,6 +15,7 @@ import (
 	"github.com/melzareix/MrMeeseeksBot/Backend/Database"
 	"github.com/melzareix/MrMeeseeksBot/Backend/Models"
 	"google.golang.org/api/calendar/v3"
+	"github.com/grokify/html-strip-tags-go"
 )
 
 func ChatHandler(w http.ResponseWriter, r *http.Request) {
@@ -24,7 +25,7 @@ func ChatHandler(w http.ResponseWriter, r *http.Request) {
 			Status:  true,
 			Code:    http.StatusOK,
 			Message: "Preflight Request!"}
-		err.ErrorAsPlainText(w)
+		err.ErrorAsJSON(w)
 		return
 	}
 
@@ -33,7 +34,7 @@ func ChatHandler(w http.ResponseWriter, r *http.Request) {
 			Status:  false,
 			Code:    http.StatusMethodNotAllowed,
 			Message: r.Method + " Method Not Allowed. Only POST requests are allowed."}
-		err.ErrorAsPlainText(w)
+		err.ErrorAsJSON(w)
 		return
 	}
 
@@ -44,7 +45,7 @@ func ChatHandler(w http.ResponseWriter, r *http.Request) {
 			Status:  false,
 			Code:    http.StatusBadRequest,
 			Message: "Invalid user UUID."}
-		err.ErrorAsPlainText(w)
+		err.ErrorAsJSON(w)
 		return
 	}
 
@@ -74,8 +75,8 @@ func HandleMessage(message string, user *Models.User, w http.ResponseWriter) {
 		err := Models.Error{
 			Status:  false,
 			Code:    http.StatusBadRequest,
-			Message: COMMANDS}
-		err.ErrorAsPlainText(w)
+			Message: "Command not recognized!\n\n" + COMMANDS}
+		err.ErrorAsJSON(w)
 	}
 }
 
@@ -86,7 +87,7 @@ func HandleScheduling(name string, user *Models.User, w http.ResponseWriter) {
 			Status:  false,
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to connect to API."}
-		err.ErrorAsPlainText(w)
+		err.ErrorAsJSON(w)
 		return
 	}
 
@@ -96,7 +97,7 @@ func HandleScheduling(name string, user *Models.User, w http.ResponseWriter) {
 			Status:  false,
 			Code:    http.StatusBadRequest,
 			Message: "No Results for " + name + "."}
-		err.ErrorAsPlainText(w)
+		err.ErrorAsJSON(w)
 		return
 	}
 
@@ -107,7 +108,7 @@ func HandleScheduling(name string, user *Models.User, w http.ResponseWriter) {
 			Status:  false,
 			Code:    http.StatusBadRequest,
 			Message: "The anime " + name + " has " + currentAnime.AiringStatus + "."}
-		err.ErrorAsPlainText(w)
+		err.ErrorAsJSON(w)
 		return
 	}
 
@@ -119,7 +120,7 @@ func HandleScheduling(name string, user *Models.User, w http.ResponseWriter) {
 			Status:  false,
 			Code:    http.StatusBadRequest,
 			Message: "Airing Dates not available for " + name + "."}
-		err.ErrorAsPlainText(w)
+		err.ErrorAsJSON(w)
 		return
 	}
 
@@ -147,7 +148,7 @@ func HandleScheduling(name string, user *Models.User, w http.ResponseWriter) {
 			Status:  false,
 			Code:    http.StatusBadRequest,
 			Message: "All episodes for " + name + "have finished airing."}
-		err.ErrorAsPlainText(w)
+		err.ErrorAsJSON(w)
 		return
 	}
 
@@ -163,17 +164,16 @@ func HandleScheduling(name string, user *Models.User, w http.ResponseWriter) {
 				Code:    http.StatusUnauthorized,
 				Message: "Failed to Authorize with Google Calendar.",
 			}
-			err.ErrorAsPlainText(w)
+			err.ErrorAsJSON(w)
 		}
 
 		authUrl := u.generateTokenUrl(config)
-		authUrl = "<a style='color:black' target='_blank' href='" + authUrl + "'>" + authUrl + "</a>"
 		resp := Models.Error{
 			Status:  false,
 			Code:    http.StatusUnauthorized,
-			Message: "Oops! You didn't link your Google Calendar Account! Click this url to link it!<br>" + authUrl,
+			Message: "Oops! You didn't link your Google Calendar Account!\n\n Click this url to link it\n\n" + authUrl,
 		}
-		resp.ErrorAsPlainText(w)
+		resp.ErrorAsJSON(w)
 		return
 	}
 
@@ -193,7 +193,7 @@ func HandleScheduling(name string, user *Models.User, w http.ResponseWriter) {
 			Status:  false,
 			Code:    http.StatusBadRequest,
 			Message: "Failed to connect to google calendar."}
-		err.ErrorAsPlainText(w)
+		err.ErrorAsJSON(w)
 		return
 	}
 
@@ -203,7 +203,7 @@ func HandleScheduling(name string, user *Models.User, w http.ResponseWriter) {
 			Status:  false,
 			Code:    http.StatusBadRequest,
 			Message: "Failed to add event to google calendar."}
-		err.ErrorAsPlainText(w)
+		err.ErrorAsJSON(w)
 		return
 	}
 
@@ -225,7 +225,7 @@ func HandleRecommendation(name string, w http.ResponseWriter) {
 			Status:  false,
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to connect to API."}
-		err.ErrorAsPlainText(w)
+		err.ErrorAsJSON(w)
 		return
 	}
 	results, err := client.Search(name)
@@ -235,7 +235,7 @@ func HandleRecommendation(name string, w http.ResponseWriter) {
 			Status:  false,
 			Code:    http.StatusBadRequest,
 			Message: "No Recommendations for " + name + "."}
-		err.ErrorAsPlainText(w)
+		err.ErrorAsJSON(w)
 		return
 	}
 
@@ -245,13 +245,13 @@ func HandleRecommendation(name string, w http.ResponseWriter) {
 	recommendedNumber := Randomize(len(recommendations))
 	recommendedAnime := recommendations[recommendedNumber]
 
-	resp := Models.SchedulingResponse{}
+	resp := Models.RecommendationResponse{}
 	animeListUrl := "https://myanimelist.net/search/all?q=" + url.QueryEscape(recommendedAnime.TitleEnglish)
 	resp.Status = true
 	resp.Code = http.StatusOK
-	resp.Message = fmt.Sprintf("<b> I am Mr.Meseeks</b>, and I recommend that you watch<br><h4><a "+
-		"target='_blank' style='color: black' href='%s'>%s</a></h4><img src='%s'/>",
-		animeListUrl, recommendedAnime.TitleEnglish, recommendedAnime.ImageUrlLge)
+	resp.AnimeTitle = recommendedAnime.TitleEnglish
+	resp.ImageURL = recommendedAnime.ImageUrlLge
+	resp.Message = "More Information:\n" + animeListUrl
 	RespondWithJSON(w, &resp)
 
 }
@@ -264,7 +264,7 @@ func HandleAnimeDetails(name string, w http.ResponseWriter) {
 			Status:  false,
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to connect to API."}
-		err.ErrorAsPlainText(w)
+		err.ErrorAsJSON(w)
 		return
 	}
 	results, err := client.Search(name)
@@ -274,7 +274,7 @@ func HandleAnimeDetails(name string, w http.ResponseWriter) {
 			Status:  false,
 			Code:    http.StatusBadRequest,
 			Message: "No Results for Anime " + name + "."}
-		err.ErrorAsPlainText(w)
+		err.ErrorAsJSON(w)
 		return
 	}
 
@@ -283,7 +283,7 @@ func HandleAnimeDetails(name string, w http.ResponseWriter) {
 			Status:  false,
 			Code:    http.StatusBadRequest,
 			Message: "No Results for Anime " + name + "."}
-		err.ErrorAsPlainText(w)
+		err.ErrorAsJSON(w)
 		return
 	}
 
@@ -291,16 +291,12 @@ func HandleAnimeDetails(name string, w http.ResponseWriter) {
 	resp := Models.AnimeDetailResponse{}
 	resp.Status = true
 	resp.Code = http.StatusOK
-	resp.Message = fmt.Sprintf("Oh Yeaah !\nHere are %s's Details\n"+
-		"Description: %s"+
-		"Total Episodes: %d"+
-		"Duration: %d"+
-		"Airing Status: %s"+
-		"Average Score: %f",
-		top.TitleEnglish,
-		top.Description, top.TotalEpisodes,
+	resp.AnimeTitle = top.TitleEnglish
+	resp.Message = fmt.Sprintf(
+		"%s\n\nTotal Episodes: %d\n\nDuration: %d\n\nAiring Status: %s\n\nAverage Score: %f",
+		strip.StripTags(top.Description), top.TotalEpisodes,
 		top.Duration, top.AiringStatus, top.AverageScore)
-	resp.ImageURL = top.ImageUrlMed
+	resp.ImageURL = top.ImageUrlLge
 	RespondWithJSON(w, &resp)
 }
 
