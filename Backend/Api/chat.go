@@ -212,7 +212,7 @@ func HandleScheduling(name string, user *Models.User, w http.ResponseWriter) {
 	resp.Code = http.StatusOK
 	formattedTime := humanize.Time(selectedTime)
 	eventLink = "<a style='color:black' target='_blank' href='" + eventLink + "'>" + eventLink + "</a>"
-	resp.Message = "🕐 Next Episode Airs " + formattedTime + "\n\n" + eventLink
+	resp.Message = "🕐 Next Episode " + formattedTime + "\n" + strip.StripTags(eventLink)
 
 	RespondWithJSON(w, &resp)
 }
