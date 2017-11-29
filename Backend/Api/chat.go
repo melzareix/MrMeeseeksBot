@@ -69,8 +69,8 @@ func HandleMessage(message string, user *Models.User, w http.ResponseWriter) {
 		HandleScheduling(strings.Join(msg[1:], " "), user, w)
 	case "recommend":
 		HandleRecommendation(strings.Join(msg[1:], " "), w)
-	case "show":
-		HandleAnimeDetails(strings.Join(msg[2:], " "), w)
+	case "info":
+		HandleAnimeDetails(strings.Join(msg[1:], " "), w)
 	default:
 		err := Models.Error{
 			Status:  false,
@@ -211,8 +211,7 @@ func HandleScheduling(name string, user *Models.User, w http.ResponseWriter) {
 	resp.Status = true
 	resp.Code = http.StatusOK
 	formattedTime := humanize.Time(selectedTime)
-	eventLink = "<a style='color:black' target='_blank' href='" + eventLink + "'>" + eventLink + "</a>"
-	resp.Message = "🕐 Next Episode " + formattedTime + "\n" + strip.StripTags(eventLink)
+	resp.Message = "🕐 Next Episode " + formattedTime + "\n" + eventLink
 
 	RespondWithJSON(w, &resp)
 }

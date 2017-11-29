@@ -12,7 +12,7 @@ const (
 	WELCOME_MESSAGE = "I'm Mr Meseeks look at me!\n\n I can show you info about an anime, " +
 		"recommend and schedule an anime.\n\n" + COMMANDS
 	COMMANDS = "Example Commands:\n" +
-		"Show Info Death Note\n" +
+		"Info Death Note\n" +
 		"Recommend Death Note\n" +
 		"Schedule Inuyashiki"
 )
