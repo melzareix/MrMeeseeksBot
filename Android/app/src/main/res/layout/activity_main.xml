@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="melzarei.com.MrMeseeksBot.MainActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/appbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:contentInsetStartWithNavigation="4dp"
+        app:logo="@mipmap/ic_logo_round"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        app:subtitle="@string/app_name"
+        app:subtitleTextAppearance="@style/TextAppearance.AppCompat"
+        app:subtitleTextColor="@color/white"
+        app:title="@string/app_name"
+        app:titleTextAppearance="@style/TextAppearance.AppCompat.Menu"
+        app:titleTextColor="@color/white"/>
+
+    <com.stfalcon.chatkit.messages.MessagesList
+        android:id="@+id/messagesList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/input"
+        app:incomingAvatarHeight="36dp"
+        app:incomingAvatarWidth="36dp"
+        app:incomingBubblePaddingLeft="8dp"
+        app:incomingBubblePaddingRight="8dp"
+        app:incomingDefaultBubbleColor="@color/colorAccent"
+        app:incomingTimeTextSize="0sp"
+        app:incomingTextLinkColor="@color/colorPrimaryDark"
+        app:outcomingDefaultBubbleColor="@color/colorPrimaryDark"/>
+
+    <com.stfalcon.chatkit.messages.MessageInput
+        android:id="@+id/input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@android:color/white"
+        android:elevation="4dp"
+        app:attachmentButtonDefaultBgColor="@color/colorPrimary"
+        app:attachmentButtonDefaultIconColor="@color/colorPrimary"
+        app:attachmentButtonDefaultIconPressedColor="@color/colorPrimary"
+        app:attachmentButtonIcon="@drawable/ic_google_calendar"
+        app:inputButtonDefaultBgColor="@color/colorPrimary"
+        app:inputButtonDefaultBgPressedColor="@color/colorPrimary"
+        app:inputButtonDefaultIconColor="@color/white"
+        app:inputHint="@string/hint_enter_a_message"
+        app:showAttachmentButton="true"/>
+</RelativeLayout>

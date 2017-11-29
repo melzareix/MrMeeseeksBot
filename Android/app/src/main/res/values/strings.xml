@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">MrMeeseeksBot</string>
+        <string name="hint_enter_a_message">Type a message…</string>
+        <string name="default_appbar_value">Ready!</string>
+        <string name="alternate_enter_a_message">Calling Meseeks Squad…</string>
+    <string name="app_short_name">MrMeseeks</string>
+</resources>
