@@ -4,6 +4,7 @@ type GeneralResponse struct {
 	Status  bool   `json:"status"`
 	Code    int    `json:"code"`
 	Message string `json:"message"`
+	GoogleCalendarAuthorized bool `json:"google_calendar_authorized"`
 }
 
 type WelcomeResponse struct {

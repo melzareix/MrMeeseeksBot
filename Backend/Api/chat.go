@@ -71,11 +71,46 @@ func HandleMessage(message string, user *Models.User, w http.ResponseWriter) {
 		HandleRecommendation(strings.Join(msg[1:], " "), w)
 	case "info":
 		HandleAnimeDetails(strings.Join(msg[1:], " "), w)
+	case "authorize":
+		HandleCalendarAuthorization(user, w)
 	default:
 		err := Models.Error{
 			Status:  false,
 			Code:    http.StatusBadRequest,
 			Message: "Command not recognized!\n\n" + COMMANDS}
+		err.ErrorAsJSON(w)
+	}
+}
+
+func HandleCalendarAuthorization(user *Models.User, w http.ResponseWriter) {
+	u := CalendarUser{User: user}
+	// No Token
+	// Send Response With OAuth link
+	if u.Token == nil {
+		config, err := u.GetConfig()
+		if err != nil {
+			err := Models.Error{
+				Status:  false,
+				Code:    http.StatusUnauthorized,
+				Message: "Failed to Authorize with Google Calendar.",
+			}
+			err.ErrorAsJSON(w)
+		}
+
+		authUrl := u.generateTokenUrl(config)
+		resp := Models.GeneralResponse{
+			Status:  false,
+			Code:    http.StatusUnauthorized,
+			Message: "Click this link to authorize Google Calendar\n\n" + authUrl,
+		}
+		RespondWithJSON(w, &resp)
+		return
+	} else {
+		err := Models.Error{
+			Status:  false,
+			Code:    http.StatusBadRequest,
+			Message: "Google Calendar Already Authorized.",
+		}
 		err.ErrorAsJSON(w)
 	}
 }
@@ -210,6 +245,7 @@ func HandleScheduling(name string, user *Models.User, w http.ResponseWriter) {
 	resp := Models.SchedulingResponse{}
 	resp.Status = true
 	resp.Code = http.StatusOK
+	resp.GoogleCalendarAuthorized = user.Token != nil
 	formattedTime := humanize.Time(selectedTime)
 	resp.Message = "🕐 Next Episode " + formattedTime + "\n" + eventLink
 
