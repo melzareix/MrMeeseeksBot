@@ -16,6 +16,10 @@ import melzarei.com.MrMeseeksBot.Utils.IncomingMessageViewHolder
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import com.instabug.library.invocation.InstabugInvocationEvent
+import com.instabug.library.Instabug
+
+
 
 
 class MainActivity : AppCompatActivity() {
@@ -153,6 +157,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        // Input Button
         input.setInputListener({ data ->
             buttonClickPlayer.start()
             adapter.addToStart(ChatListMessage(data.toString(), null, "User"), true)
@@ -160,6 +165,11 @@ class MainActivity : AppCompatActivity() {
             sendChatMessage(dc)
             true
         })
+
+        // InstaBug integration
+        Instabug.Builder(application, "4d9210747d8131ca5d29bb2fe129a01e")
+                .setInvocationEvent(InstabugInvocationEvent.SHAKE)
+                .build()
 
     }
 }

@@ -29,6 +29,7 @@ dependencies {
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.github.stfalcon:chatkit:0.2.2'
     compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'com.instabug.library:instabug:4.3.3'
 
     compile 'com.bluelinelabs:logansquare:1.3.7' //JSON parsing and serializing library
     compile 'com.github.aurae.retrofit2:converter-logansquare:1.4.1' //Converter for loganSquare JSON serializer for RetroFit.
