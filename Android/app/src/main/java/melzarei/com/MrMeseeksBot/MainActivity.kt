@@ -80,7 +80,9 @@ class MainActivity : AppCompatActivity() {
                             showToast(errorMessageText + " Retrying in 5 seconds.")
                         }
                         Thread.sleep(5000)
-                        sendChatMessage(dc)
+                        runOnUiThread {
+                            sendChatMessage(dc)
+                        }
                     }
 
                 })
@@ -98,7 +100,9 @@ class MainActivity : AppCompatActivity() {
                             showToast(errorMessageText + " Retrying in 5 seconds.")
                         }
                         Thread.sleep(5000)
-                        handleWelcome()
+                        runOnUiThread {
+                            handleWelcome()
+                        }
                     }
 
                     override fun onResponse(call: Call<WelcomeResponse>?, response: Response<WelcomeResponse>?) {

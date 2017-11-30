@@ -23,7 +23,7 @@ object ApiClient {
         val client = OkHttpClient.Builder().addInterceptor(interceptor).build()
         retrofit = Retrofit
                 .Builder()
-                .baseUrl("http://35.193.174.93:3000")
+                .baseUrl("http://35.193.174.93")
                 .client(client)
                 .callbackExecutor(Executors.newSingleThreadExecutor())
                 .addConverterFactory(LoganSquareConverterFactory.create())
